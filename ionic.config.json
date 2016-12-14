@@ -1,4 +1,10 @@
 {
   "name": "dipPlayer",
-  "app_id": ""
+  "app_id": "",
+  "proxies": [
+    {
+      "path": "/api",
+      "proxyUrl": "http://dip.xiso.co.kr/"
+    }
+  ]
 }

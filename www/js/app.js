@@ -3,9 +3,9 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-angular.module('dip', ['ionic','dip.services','dip.controllers'])
+var xisoDip = angular.module('dip', ['ionic'])
 
-    .run(function($ionicPlatform) {
+    .run(function($ionicPlatform, Auth) {
         $ionicPlatform.ready(function() {
             if(window.cordova && window.cordova.plugins.Keyboard) {
                 // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -21,8 +21,17 @@ angular.module('dip', ['ionic','dip.services','dip.controllers'])
                 StatusBar.styleDefault();
             }
 
-            console.log(ionic.Platform.device());// returns an object containing device uuid,version, platform, manufacturer ...
+            // console.log(ionic.Platform.device());// returns an object containing device uuid,version, platform, manufacturer ...
+            
+            Auth.setDeviceInfo(ionic.Platform.device());
+
+            Auth.getAuth();
         });
+    })
+
+    .constant('xisoConfig', {
+        url: '/api'
+        // url: 'http://dip.xiso.co.kr'
     })
 
     .config(function($stateProvider, $urlRouterProvider){

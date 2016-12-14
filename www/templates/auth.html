@@ -1,13 +1,10 @@
-<ion-view view-title="로그인" name="login-view">
-    <ion-content class="padding">
-        <div class="list list-inset">
-            <label class="item item-input">
-                <input type="text" placeholder="Username" ng-model="params.user_id">
-            </label>
-            <label class="item item-input">
-                <input type="password" placeholder="Password" ng-model="params.password">
-            </label>
+<ion-view cache-view="false">
+    <ion-nav-title>단말기 인증번호</ion-nav-title>
+    <ion-content padding="true">
+        <div class="padding">
+            <h3 class="t-center padding">인증번호</h3>
+            <h2 class="t-center padding">{{svAuth.auth_no}}</h2>
+            <h5 class="t-center padding">인증 번호를 관리 단말기에 입력해주세요.</h5>
         </div>
-        <button class="button button-block button-calm" ng-click="login()">Login</button>
     </ion-content>
 </ion-view>
