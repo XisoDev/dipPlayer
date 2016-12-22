@@ -1,0 +1,36 @@
+<style>
+    /* Hiding video controls
+    * See: https://css-tricks.com/custom-controls-in-html5-video-full-screen/
+    * --------------------------------------- */
+    video::-webkit-media-controls {
+        display:none !important;
+    }
+
+    .progress {
+        margin: 0px;
+        height: 8px;
+        background-color: #F1292B !important;
+        border-radius: 2px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+    }
+</style>
+
+<ion-view>
+    <div ng-if="clip_info.type == 'I'">
+        <img ng-src="{{clip_info.content}}" width="100%" />
+    </div>
+    <div ng-if="clip_info.type == 'M'">
+        <video controls autoplay width="100%">
+            <source ng-src="{{clip_info.content}}" type="{{clip_info.file_type}}">
+            비디오플레이가 지원되지 않습니다. 브라우저를 업데이트하세요.
+        </video>
+    </div>
+    <!--<div id="fullpage">
+        <div class="section " id="section0">
+            <video id="myVideo" loop muted controls="false" autoplay>
+                <source src="/img/sample.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>-->
+
+</ion-view>
