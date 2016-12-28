@@ -1,2 +1,46 @@
 /* Empty. Add your own CSS if you like */
 .t-center {text-align: center;}
+
+/* Hiding video controls
+    * See: https://css-tricks.com/custom-controls-in-html5-video-full-screen/
+    * --------------------------------------- */
+video::-webkit-media-controls {
+    display:none !important;
+}
+
+body {
+    background: #000000;
+}
+
+.fullscreen-image {
+    max-width: 100%;
+    max-height: 100%;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    overflow: auto;
+    position: fixed;
+    right: 0;
+    top: 0;
+}
+.text_top {
+    z-index: 999;
+    width:100%;
+    position: absolute;
+    top: 0;
+    font-size: 20px;
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+.text_bot {
+    z-index: 999;
+    width:100%;
+    position: absolute;
+    bottom: 0;
+    font-size: 20px;
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    padding: 10px;
+}

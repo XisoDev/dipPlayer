@@ -7,81 +7,109 @@ xisoDip
         $scope.svAuth = Auth;
 
         $scope.goDemo = function(){
-            $state.go('demo');
+            $state.go('player.demo');
         };
     })
 
-    .controller('playCtrl', function($scope){
-
+    .controller('playerCtrl', function($scope, Sequence, Auth){
+        $scope.sequence = Sequence;
+        $scope.auth = Auth;
     })
 
-    .controller('demoCtrl', function($scope, $state, $stateParams, xiFile, xiHttp, Toast, Sequence, xisoConfig){
+    .controller('tempCtrl', function($scope, $state, $stateParams, xiFile, xiHttp, Toast, Sequence, xisoConfig, $ionicPlatform){
         $scope.xiFile = xiFile;
+        $scope.sequence = Sequence;
+        $scope.clip_info = {};
 
-        $scope.getSequence = function(){
-            xiHttp.send('seq','dispGetDemoSeq').then(function(res){
+        // 메인서버에서 시퀀스를 구해온다
+        $scope.getDemo = function () {
+            xiHttp.send('seq', 'dispGetDemoSeq').then(function (res) {
                 console.log(res);
-                if(res.data.error == 0){
-                    Sequence.setSequence(res.data.seq, 'm');    // m : main_server
+                if (res.data.error == 0) {
+                    $scope.sequence.setSequence(res.data.seq, 'm');    // m : main_server(demo)
 
-                    xiFile.download(Sequence.timelines, Sequence.dir, xisoConfig.url);
-
-                    $scope.checkSequence();
-                }else{
+                    $scope.xiFile.download($scope.sequence.temp_seq.timelines, $scope.sequence.temp_seq.dir, xisoConfig.url);
+                } else {
                     Toast(res.data.message);
                 }
-            }, function(res){ console.log(res); });
+            }, function (res) {
+                console.log(res);
+            });
         };
 
-        $scope.checkSequence = function(){
-            if(window.localStorage['seq'] && Sequence.timelines) {
-                $state.go('demoDetail', {cur_clip : 0});
-
-            }else {
-                // 없으면 즉시 구함
-                $scope.getSequence();
-            }
-        };
-
-        $scope.checkSequence();
+        if ($scope.sequence.main_seq.timelines.length > 0) {
+            $ionicPlatform.ready(function() {
+                $state.go('player.demo', {cur_clip: 0});
+            });
+        } else {
+            $scope.getDemo();
+        }
     })
 
-    .controller('demoDetailCtrl', function($scope, $state, xiFile, Sequence, $stateParams, $timeout, $ionicNativeTransitions){
+    .controller('demoCtrl', function($scope, $state, $stateParams, xiFile, xiHttp, Toast, Sequence){
+        $scope.xiFile = xiFile;
         $scope.sequence = Sequence;
+        $scope.clip_info = {};
+        $scope.timeID;
+        $scope.timeID2;
 
-        if($scope.sequence.timelines) {
-            var index = $stateParams.cur_clip;
-            var cur_clip = $scope.sequence.timelines[index];
-            var len = $scope.sequence.timelines.length;
+        // $scope.$on('$stateChangeSuccess', function () {
+        $scope.$on('$ionicView.enter', function(e) {
+            // console.log('state changed : ' + $stateParams.cur_clip);
+            // if(cordova.file.externalDataDirectory == null) console.log('널이다');
+            // else  console.log('널이 아니다');
 
-            console.log(cur_clip);
+            clearTimeout($scope.timeID);
+            clearTimeout($scope.timeID2);
 
-            $scope.clip_info = {
-                type : cur_clip.type,
-                file_type : cur_clip.file_type,
-                content : cordova.file.externalDataDirectory + Sequence.dir + cur_clip.file
-            };
+            if($scope.sequence.main_seq.timelines.length > 0 && cordova.file.externalDataDirectory != null) {
+                var index = $stateParams.cur_clip ? $stateParams.cur_clip : 0;
+                var cur_clip = $scope.sequence.main_seq.timelines[index];
+                var len = $scope.sequence.main_seq.timelines.length;
+                var first = $scope.sequence.main_seq.timelines[0];
 
-            $timeout(function(){
-                if(len > (Number(index) + 1)) {
-                    var arr = cur_clip.transition.split('-');
+                $scope.clip_info = {
+                    file_type: cur_clip.file_type,
+                    content: cordova.file.externalDataDirectory + $scope.sequence.main_seq.dir + cur_clip.file
+                };
+
+                var temp = {};
+                var next_clip = 0;
+
+                if (len > (Number(index) + 1)) {
+                    temp = cur_clip;
+                    next_clip = Number(index) + 1;
+                } else {
+                    temp = first;
+                }
+
+                $scope.timeID = setTimeout(function () {
+                    console.log('아래는 demo 의 temp');
+                    console.log(temp);
+                    var arr = temp.transition.split('-');
                     var obj = {};
-                    var duration = 1000;
-                    if(arr[0] == 'fade'){
+                    var duration = 500;
+
+                    if (arr[0] == 'fade') {
                         obj.type = 'fade';
-                        obj.duration = duration;
-                    }else {
+                    } else {
                         obj.type = arr[0];
                         obj.direction = arr[1];
-                        obj.duration = duration;
                     }
-                    console.log(obj);
+                    obj.duration = duration;
 
-                    $ionicNativeTransitions.stateGo('demoDetail', {cur_clip : (Number(index) + 1)}, {}, obj);
-                }else{
-                    $state.go('authentication');
-                }
-            }, 1000 * cur_clip.limit);
-        }
+                    $scope.sequence.setCurSeq(next_clip, obj);
+
+                }, 1000 * temp.limit) + 600;
+
+
+            }else{
+                $scope.timeID2 = setTimeout(function(){
+                    $scope.sequence.cur_seq = 0;
+                    $state.go('player.demo', {cur_clip : 0});
+                },500);
+            }
+        });
+
     });
 

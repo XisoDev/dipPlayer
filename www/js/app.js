@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitions'])
 
-    .run(function($ionicPlatform, $rootScope, $ionicPopup, Auth) {
+    .run(function($ionicPlatform, $rootScope, $ionicPopup, Auth, Sequence) {
         $ionicPlatform.ready(function() {
             if(window.cordova && window.cordova.plugins.Keyboard) {
                 // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -25,7 +25,17 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
             
             Auth.setDeviceInfo(ionic.Platform.device());
 
-            Auth.getAuth();
+            console.log(Sequence.main_seq);
+
+            if(Sequence.main_seq.play_type == 'm') {
+                console.log('메인 플레이로 이동');
+                Auth.is_auth = true;
+
+                // Auth.getSeq();
+            }else{
+                console.log('데모 플레이로 이동');
+                Auth.getAuth();
+            }
         });
 
         //back button action
@@ -62,35 +72,63 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
 
     .config(function($stateProvider, $urlRouterProvider){
         $stateProvider
-            .state('authentication', {
-                url: '/auth',
-                templateUrl: 'templates/auth.html',
-                controller: 'authCtrl'
+            // .state('authentication', {
+            //     url: '/auth',
+            //     templateUrl: 'templates/auth.html',
+            //     controller: 'authCtrl'
+            // })
+            //
+            // .state('play', {
+            //     url: '/play/:cur_clip',
+            //     templateUrl: 'templates/play.html',
+            //     controller: 'playCtrl',
+            //     onEnter: function($state, Auth){
+            //         if(!Auth.isAuthenticated()){
+            //             $state.go('authentication');
+            //         }else{
+            //             // if(!Auth.isGotSeq()) {
+            //             //     $state.go('demo');  // 아직 할당된 시퀀스가 없으면 데모 플레이
+            //             // }
+            //         }
+            //     }
+            // })
+            .state('player', {
+                url: '/player',
+                abstract: true,
+                templateUrl: 'templates/layout.html',
+                controller: 'playerCtrl'
             })
 
-            .state('play', {
-                url: '/play',
-                templateUrl: 'templates/play.html',
-                controller: 'playCtrl',
-                onEnter: function($state, Auth){
-                    if(!Auth.isAuthenticated()){
-                        $state.go('authentication');
+            .state('player.temp', {
+                url: '/temp',
+                views: {
+                    'player-demo': {
+                        templateUrl: 'templates/temp.html',
+                        controller: 'tempCtrl'
                     }
                 }
             })
 
-            .state('demo', {
-                url: '/demo',
-                templateUrl: 'templates/demo.html',
-                controller: 'demoCtrl'
+            .state('player.demo', {
+                url: '/demo/:cur_clip',
+                views: {
+                    'player-demo': {
+                        templateUrl: 'templates/demo.html',
+                        controller: 'demoCtrl'
+                    }
+                }
             })
 
-            .state('demoDetail', {
-                url: '/demo/:cur_clip',
-                templateUrl: 'templates/demo.html',
-                controller: 'demoDetailCtrl'
+            .state('player.demo2', {
+                url: '/demo2/:cur_clip',
+                views: {
+                    'player-demo': {
+                        templateUrl: 'templates/demo2.html',
+                        controller: 'demoCtrl'
+                    }
+                }
             });
 
         // if none of the above states are matched, use this as the fallback
-        $urlRouterProvider.otherwise('/play');
+        $urlRouterProvider.otherwise('/player/temp');
     });
