@@ -123,11 +123,11 @@ xisoDip
                         // console.log($rootScope.sequence.main_seq);
 
                         var cur_dir = $rootScope.sequence.main_seq.dir;
-                        var down_dir = 'd' + res.data.seq.seq_srl;
+                        var down_dir = 'm' + res.data.seq.seq_srl;
                         console.log('cur dir : '+ cur_dir + ', download dir : ' + down_dir);
                         if(cur_dir != down_dir) {
                             // 파일 다운로드
-                            $rootScope.sequence.setSequence(res.data.seq, 'd');    // d : data_sever
+                            $rootScope.sequence.setSequence(res.data.seq, 'm');    // Main(dataServer)
 
                             xiFile.download($rootScope.sequence.temp_seq.timelines, $rootScope.sequence.temp_seq.dir, self.server_url);
                         }
@@ -247,7 +247,7 @@ xisoDip
             self.temp_seq.timelines = [];
             self.temp_seq.text_clip = seq.text_clip;
             self.temp_seq.dir = prefix + seq.seq_srl;    // 메인서버의 시퀀스와 데이터서버의 시퀀스가 같을 수 있으므로
-            self.temp_seq.play_type = prefix;   // Demo : D, Main : M
+            self.temp_seq.play_type = prefix;   // Demo : d, Main(dataServer) : m
 
             for(var key in seq.timeline){
                 self.temp_seq.timelines[key] = {
@@ -263,12 +263,13 @@ xisoDip
         // temp_seq 가 모두 다운로드 되면 main_seq 를 덮어쓰고 플레이 시킴
         self.tempToMain = function(){
             self.main_seq = angular.copy(self.temp_seq);
+            console.log('temp 2 main --- 아래는 덮어씌워진 main seq');
+            console.log(self.main_seq);
+            window.localStorage['seq'] = JSON.stringify(self.main_seq);
             
             // TODO 기존 시퀀스 파일 제거부분도 추가 되어야함
             self.temp_seq = {};
             self.temp_seq.timelines = [];
-            
-            window.localStorage['seq'] = JSON.stringify(self.main_seq);
 
             self.cur_seq = 0;
             $state.go('player.demo', {cur_clip: 0});   // 데모 플레이어로 이동시킴

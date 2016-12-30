@@ -26,7 +26,7 @@ xisoDip
             xiHttp.send('seq', 'dispGetDemoSeq').then(function (res) {
                 console.log(res);
                 if (res.data.error == 0) {
-                    $scope.sequence.setSequence(res.data.seq, 'm');    // m : main_server(demo)
+                    $scope.sequence.setSequence(res.data.seq, 'd');    // d : demo server
 
                     $scope.xiFile.download($scope.sequence.temp_seq.timelines, $scope.sequence.temp_seq.dir, xisoConfig.url);
                 } else {
@@ -37,11 +37,12 @@ xisoDip
             });
         };
 
+        // 단말기에 저장된 시퀀스가 있으면
         if ($scope.sequence.main_seq.timelines.length > 0) {
             $ionicPlatform.ready(function() {
-                $state.go('player.demo', {cur_clip: 0});
+                $state.go('player.demo', {cur_clip: 0}); // 플레이 시킨다
             });
-        } else {
+        } else { // 없으면 받아옴
             $scope.getDemo();
         }
     })
@@ -83,9 +84,11 @@ xisoDip
                     temp = first;
                 }
 
+                console.log('play time = ' + temp.limit + '초');
+
                 $scope.timeID = setTimeout(function () {
-                    console.log('아래는 demo 의 temp');
-                    console.log(temp);
+                    // console.log('아래는 demo 의 temp');
+                    // console.log(temp);
                     var arr = temp.transition.split('-');
                     var obj = {};
                     var duration = 500;
