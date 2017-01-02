@@ -63,6 +63,26 @@ xisoDip
 
         $rootScope.sequence = Sequence;
 
+        // 같은 배열인지 비교하기 (https://gist.github.com/brandon-sylee/62c9da725b44ead651195aaf9b8d319d)
+        var compare = function(a, b){
+            var i = 0, j;
+            if(typeof a == "object" && a){
+                if(Array.isArray(a)){
+                    if(!Array.isArray(b) || a.length != b.length) return false;
+                    for(j = a.length ; i < j ; i++) if(!compare(a[i], b[i])) return false;
+                    return true;
+                }else{
+                    for(j in b) if(b.hasOwnProperty(j)) i++;
+                    for(j in a) if(a.hasOwnProperty(j)){
+                        if(!compare(a[j], b[j])) return false;
+                        i--;
+                    }
+                    return !i;
+                }
+            }
+            return a === b;
+        };
+
         var checkAuth = function(){
             var deviceInfo = JSON.parse(window.localStorage['device']);
 
@@ -122,14 +142,18 @@ xisoDip
                         // console.log('아래는 현재 main_seq');
                         // console.log($rootScope.sequence.main_seq);
 
-                        var cur_dir = $rootScope.sequence.main_seq.dir;
-                        var down_dir = 'm' + res.data.seq.seq_srl;
-                        console.log('cur dir : '+ cur_dir + ', download dir : ' + down_dir);
-                        if(cur_dir != down_dir) {
-                            // 파일 다운로드
-                            $rootScope.sequence.setSequence(res.data.seq, 'm');    // Main(dataServer)
+                        var device_seq = $rootScope.sequence.main_seq;
+                        var server_seq = res.data.seq;
 
-                            xiFile.download($rootScope.sequence.temp_seq.timelines, $rootScope.sequence.temp_seq.dir, self.server_url);
+                        if(device_seq.timelines && server_seq.timelines) {
+
+                            // 같은 배열인지 비교후 다르면 다운로드
+                            if(!compare(device_seq.timelines, server_seq.timelines)) {
+                                // 파일 다운로드
+                                $rootScope.sequence.setSequence(res.data.seq, 'm');    // Main(dataServer)
+
+                                xiFile.download($rootScope.sequence.temp_seq.timelines, $rootScope.sequence.temp_seq.dir, self.server_url);
+                            }
                         }
                     } else {
                         console.log(res.data.message);
@@ -224,6 +248,8 @@ xisoDip
         self.temp_seq = {};             // 다운로드 중인 시퀀스 정보
         self.temp_seq.timelines = [];
 
+        self.cur_qr = null; //qrcode url
+
         if(window.localStorage['seq']) {
             self.main_seq = JSON.parse(window.localStorage['seq']);
             console.log('기기에 저장된 시퀀스 읽어옴 - 아래');
@@ -255,7 +281,10 @@ xisoDip
                     file : seq.timeline[key].uploaded_filename.substr(seq.timeline[key].uploaded_filename.lastIndexOf('/')),
                     uploaded : seq.timeline[key].uploaded_filename.substr(2),
                     transition : seq.timeline[key].transition,
-                    file_type : seq.timeline[key].file_type
+                    file_type : seq.timeline[key].file_type,
+                    file_srl : seq.timeline[key].file_srl,
+                    url : seq.timeline[key].url,
+                    is_show_qr : seq.timeline[key].is_show_qr
                 };
             }
         };

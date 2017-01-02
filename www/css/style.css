@@ -44,3 +44,10 @@ body {
     color: #fff;
     padding: 10px;
 }
+
+.qrcode {
+    z-index: 999;
+    position: absolute;
+    bottom: 50px;
+    right: 0;
+}

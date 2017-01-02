@@ -47,7 +47,7 @@ xisoDip
         }
     })
 
-    .controller('demoCtrl', function($scope, $state, $stateParams, xiFile, xiHttp, Toast, Sequence){
+    .controller('demoCtrl', function($scope, $state, $stateParams, xiFile, xiHttp, dHttp, Toast, Sequence){
         $scope.xiFile = xiFile;
         $scope.sequence = Sequence;
         $scope.clip_info = {};
@@ -65,33 +65,59 @@ xisoDip
 
             if($scope.sequence.main_seq.timelines.length > 0 && cordova.file.externalDataDirectory != null) {
                 var index = $stateParams.cur_clip ? $stateParams.cur_clip : 0;
-                var cur_clip = $scope.sequence.main_seq.timelines[index];
                 var len = $scope.sequence.main_seq.timelines.length;
-                var first = $scope.sequence.main_seq.timelines[0];
+                var cur_clip = $scope.sequence.main_seq.timelines[index];
 
+                var temp = {};  //다음에 재생할 클립의 정보를 담음
+                var next_clip = 0;
+
+                // 마지막 재생클립이 아니면
+                if (len > (Number(index) + 1)) {
+                    next_clip = Number(index) + 1;
+                    temp = $scope.sequence.main_seq.timelines[next_clip];  // 다음 클립에 대한 정보를 저장. 전환 효과 때문
+
+                }
+                // 마지막 재생클립이면
+                else {
+                    temp = $scope.sequence.main_seq.timelines[0];  // 처음 클립에 대한 정보를 저장. 전환 효과 때문
+                }
+
+                // 현재 플레이 되는 클립의 정보
                 $scope.clip_info = {
                     file_type: cur_clip.file_type,
                     content: cordova.file.externalDataDirectory + $scope.sequence.main_seq.dir + cur_clip.file
                 };
 
-                var temp = {};
-                var next_clip = 0;
+                console.log(cur_clip);
 
-                if (len > (Number(index) + 1)) {
-                    temp = cur_clip;
-                    next_clip = Number(index) + 1;
-                } else {
-                    temp = first;
+                if(cur_clip.is_show_qr == 'Y' && cur_clip.url){
+                    $scope.sequence.cur_qr = cur_clip.url;
+                }else{
+                    $scope.sequence.cur_qr = null;
                 }
 
-                console.log('play time = ' + temp.limit + '초');
+                if(cur_clip.play_type == 'm'){  //메인
+                    dHttp.send('file', 'procUpdateCount', {file_srl : cur_clip.file_srl}).then(function(res){
+                        // console.log(res);
+                    }, function(res){
+                        console.log(res);
+                    });
+                }else{  //데모
+                    xiHttp.send('file', 'procUpdateCount', {file_srl : cur_clip.file_srl}).then(function(res){
+                        // console.log(res);
+                    }, function(res){
+                        console.log(res);
+                    });
+                }
+
+                console.log('play time = ' + cur_clip.limit + '초');
 
                 $scope.timeID = setTimeout(function () {
                     // console.log('아래는 demo 의 temp');
                     // console.log(temp);
                     var arr = temp.transition.split('-');
                     var obj = {};
-                    var duration = 500;
+                    var duration = 500; // 효과 전환 시간
 
                     if (arr[0] == 'fade') {
                         obj.type = 'fade';
@@ -103,7 +129,7 @@ xisoDip
 
                     $scope.sequence.setCurSeq(next_clip, obj);
 
-                }, 1000 * temp.limit) + 600;
+                }, 1000 * cur_clip.limit) + 600;
 
 
             }else{

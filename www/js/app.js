@@ -25,7 +25,7 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
             
             Auth.setDeviceInfo(ionic.Platform.device());
 
-            console.log(Sequence.main_seq);
+            // console.log(Sequence.main_seq);
 
             if(Sequence.main_seq.play_type == 'm') {
                 console.log('메인 플레이로 이동');
@@ -68,6 +68,32 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
     .constant('xisoConfig', {
         // url: '/api/'    // PC 테스트용
         url: 'http://dip.xiso.co.kr/'    // 실제 기기 테스트용
+    })
+
+    .directive('qrcode', function($interpolate) {
+        return {
+            restrict: 'E',
+            link: function($scope, $element, $attrs) {
+
+                var options = {
+                    text: '',
+                    width: 128,
+                    height: 128,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: 'H'
+                };
+
+                Object.keys(options).forEach(function(key) {
+                    options[key] = $interpolate($attrs[key] || '')($scope) || options[key];
+                });
+
+                options.correctLevel = QRCode.CorrectLevel[options.correctLevel];
+
+                new QRCode($element[0], options);
+
+            }
+        };
     })
 
     .config(function($stateProvider, $urlRouterProvider){
