@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.ionicframework.dipplayer494891" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>dipPlayer</name>
+  <name>Player</name>
   <description>
         An Ionic Framework and Cordova project.
     </description>
@@ -17,7 +17,7 @@
   <preference name="android-minSdkVersion" value="16"/>
   <preference name="BackupWebStorage" value="none"/>
   <preference name="SplashScreen" value="none"/>
-  <!--<preference name="Orientation" value="landscape"/>-->
+  <preference name="CrosswalkAnimatable" value="true"/>
   <feature name="StatusBar">
     <param name="ios-package" value="CDVStatusBar" onload="true"/>
   </feature>
@@ -76,5 +76,6 @@
   <allow-navigation href="http://172.30.1.55:8100"/>
   <allow-navigation href="http://172.30.1.52:8100"/>
   <allow-navigation href="http://172.30.1.8:8100"/>
+  <allow-navigation href="http://172.30.1.50:8100"/>
   <icon src="resources/android/icon/drawable-xhdpi-icon.png"/>
 </widget>

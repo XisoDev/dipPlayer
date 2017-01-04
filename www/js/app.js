@@ -18,7 +18,8 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
                 cordova.plugins.Keyboard.disableScroll(true);
             }
             if(window.StatusBar) {
-                StatusBar.styleDefault();
+                // StatusBar.styleDefault();
+                StatusBar.hide();
             }
 
             // console.log(ionic.Platform.device());// returns an object containing device uuid,version, platform, manufacturer ...
@@ -31,7 +32,7 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
                 console.log('메인 플레이로 이동');
                 Auth.is_auth = true;
 
-                // Auth.getSeq();
+                Auth.getSeq();
             }else{
                 console.log('데모 플레이로 이동');
                 Auth.getAuth();
@@ -77,8 +78,8 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
 
                 var options = {
                     text: '',
-                    width: 128,
-                    height: 128,
+                    width: 100,
+                    height: 100,
                     colorDark: '#000000',
                     colorLight: '#ffffff',
                     correctLevel: 'H'

@@ -63,24 +63,22 @@ xisoDip
 
         $rootScope.sequence = Sequence;
 
-        // 같은 배열인지 비교하기 (https://gist.github.com/brandon-sylee/62c9da725b44ead651195aaf9b8d319d)
-        var compare = function(a, b){
-            var i = 0, j;
-            if(typeof a == "object" && a){
-                if(Array.isArray(a)){
-                    if(!Array.isArray(b) || a.length != b.length) return false;
-                    for(j = a.length ; i < j ; i++) if(!compare(a[i], b[i])) return false;
-                    return true;
-                }else{
-                    for(j in b) if(b.hasOwnProperty(j)) i++;
-                    for(j in a) if(a.hasOwnProperty(j)){
-                        if(!compare(a[j], b[j])) return false;
-                        i--;
-                    }
-                    return !i;
+        if(window.localStorage['server_url']) self.server_url = JSON.parse(window.localStorage['server_url']);
+
+        // 같은 타임라인인지 비교
+        var compare_timeline = function(a, b){
+            var result = true;
+            
+            if(a.length != b.length) return false;
+            
+            for(i =0 ; i < a.length ; i++){
+                if(a[i].file_srl != b[i].file_srl){
+                    result = false;
+                    return false;
                 }
             }
-            return a === b;
+            
+            return result;
         };
 
         var checkAuth = function(){
@@ -138,21 +136,26 @@ xisoDip
                     console.log('시퀀스가 들어왔는지 체크중..');
                     if (res.data.error == 0) {
                         console.log(res.data.message);
-                        // TODO 여기서 시퀀스가 변경되었는지 체크해봐라
+
                         // console.log('아래는 현재 main_seq');
                         // console.log($rootScope.sequence.main_seq);
 
+                        // 시퀀스가 변경되었는지 체크
                         var device_seq = $rootScope.sequence.main_seq;
                         var server_seq = res.data.seq;
 
-                        if(device_seq.timelines && server_seq.timelines) {
+                        if(device_seq.timelines && server_seq.timeline) {
+                            console.log('device_seq and sever_seq is available');
 
                             // 같은 배열인지 비교후 다르면 다운로드
-                            if(!compare(device_seq.timelines, server_seq.timelines)) {
+                            if(!compare_timeline(device_seq.timelines, server_seq.timeline)) {
+                                console.log('다른 타임라인입니다.');
                                 // 파일 다운로드
-                                $rootScope.sequence.setSequence(res.data.seq, 'm');    // Main(dataServer)
+                                $rootScope.sequence.setSequence(server_seq, 'm');    // Main(dataServer)
 
                                 xiFile.download($rootScope.sequence.temp_seq.timelines, $rootScope.sequence.temp_seq.dir, self.server_url);
+                            }else{
+                                console.log('같은 타임라인입니다.');
                             }
                         }
                     } else {
@@ -190,7 +193,6 @@ xisoDip
         var self = this;
 
         self.download = function(timelines, dir, url){
-
             if(timelines.length > 0) {
                 $ionicPlatform.ready(function() {
 
@@ -250,6 +252,11 @@ xisoDip
 
         self.cur_qr = null; //qrcode url
 
+        self.time_id1 = null;
+        self.time_id2 = null;
+        
+        // self.clip_info = {};
+
         if(window.localStorage['seq']) {
             self.main_seq = JSON.parse(window.localStorage['seq']);
             console.log('기기에 저장된 시퀀스 읽어옴 - 아래');
@@ -259,7 +266,14 @@ xisoDip
         self.setCurSeq = function(seq_no, transOpt){
             console.log('state changed : '+ self.cur_seq +' => '+ seq_no);
 
+            clearTimeout(self.time_id1);
+            clearTimeout(self.time_id2);
+
             self.cur_seq = seq_no;
+
+            // transOpt.fixedPixelsTop = 40; // the number of pixels of your fixed header, default 0 (iOS and Android)
+            transOpt.fixedPixelsBottom = 40; // the number of pixels of your fixed footer (f.i. a tab bar), default 0 (iOS and Android)
+
             console.log('$state.current.name = '+$state.current.name);
             if ($state.current.name == 'player.demo') {
                 $ionicNativeTransitions.stateGo('player.demo2', {cur_clip: self.cur_seq}, {}, transOpt);
@@ -300,9 +314,72 @@ xisoDip
             self.temp_seq = {};
             self.temp_seq.timelines = [];
 
+            clearTimeout(self.time_id1);
+            clearTimeout(self.time_id2);
+
             self.cur_seq = 0;
-            $state.go('player.demo', {cur_clip: 0});   // 데모 플레이어로 이동시킴
+            // $state.go('player.demo', {cur_clip: 0});   // 데모 플레이어로 이동시킴
+
+            $ionicNativeTransitions.stateGo('player.demo2', {cur_clip: self.cur_seq}, {}, {"type":"fade"});
         };
+        
+        /*self.play = function(idx){
+            var timeline_len = self.main_seq.timelines.length;
+            
+
+            var cur_clip = self.main_seq.timelines[idx];
+
+            var next_clip = {};
+            var next_idx = 0;
+
+            // 마지막 클립이 아니면 다음 클립 가져옴 (전환 효과를 가져오기 위함)
+            if (timeline_len > Number(idx) + 1) {
+                next_idx = Number(idx) + 1;
+            }
+            next_clip = self.main_seq.timelines[next_idx];
+            self.clip_info = {};
+            self.clip_info.file_type = cur_clip.file_type;
+            self.clip_info.content = cordova.file.externalDataDirectory + self.main_seq.dir + cur_clip.file;
+
+            if (cur_clip.is_show_qr == 'Y' && cur_clip.url) {
+                self.cur_qr = cur_clip.url;
+            } else {
+                self.cur_qr = null;
+            }
+
+            if (cur_clip.play_type == 'm') {  //메인
+                dHttp.send('file', 'procUpdateCount', {file_srl: cur_clip.file_srl}).then(function (res) {
+                    // console.log(res);
+                }, function (res) {
+                    console.log(res);
+                });
+            } else {  //데모
+                xiHttp.send('file', 'procUpdateCount', {file_srl: cur_clip.file_srl}).then(function (res) {
+                    // console.log(res);
+                }, function (res) {
+                    console.log(res);
+                });
+            }
+
+            console.log('play time = ' + cur_clip.limit + '초');
+
+            self.time_id1 = setTimeout(function(){
+                var arr = next_clip.transition.split('-');
+                var obj = {};
+                var duration = 500; // 효과 전환 시간
+
+                if (arr[0] == 'fade') {
+                    obj.type = 'fade';
+                } else {
+                    obj.type = arr[0];
+                    obj.direction = arr[1];
+                }
+                obj.duration = duration;
+                self.setCurSeq(next_clip, obj);
+
+            }, 1000 * cur_clip.limit + 550);
+            
+        };*/
 
         return self;
     });
