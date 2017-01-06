@@ -196,6 +196,8 @@ xisoDip
             if(timelines.length > 0) {
                 $ionicPlatform.ready(function() {
 
+                    // console.log(cordova.file);
+
                     $ionicLoading.show({
                         template: 'File Downloading...',
                         duration: 30000
@@ -241,7 +243,7 @@ xisoDip
 
     .factory('Sequence', function($state, $ionicNativeTransitions){
         var self = this;
-        
+
         self.cur_seq = 0;   //현재 재생할 목록
 
         self.main_seq = {};             // 플레이 될 시퀀스 정보
@@ -254,7 +256,7 @@ xisoDip
 
         self.time_id1 = null;
         self.time_id2 = null;
-        
+
         // self.clip_info = {};
 
         if(window.localStorage['seq']) {
@@ -302,14 +304,14 @@ xisoDip
                 };
             }
         };
-        
+
         // temp_seq 가 모두 다운로드 되면 main_seq 를 덮어쓰고 플레이 시킴
         self.tempToMain = function(){
             self.main_seq = angular.copy(self.temp_seq);
             console.log('temp 2 main --- 아래는 덮어씌워진 main seq');
             console.log(self.main_seq);
             window.localStorage['seq'] = JSON.stringify(self.main_seq);
-            
+
             // TODO 기존 시퀀스 파일 제거부분도 추가 되어야함
             self.temp_seq = {};
             self.temp_seq.timelines = [];

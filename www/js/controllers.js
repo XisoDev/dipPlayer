@@ -11,9 +11,14 @@ xisoDip
         };
     })
 
-    .controller('playerCtrl', function($scope, Sequence, Auth){
+    .controller('playerCtrl', function($scope, Sequence, Auth, xiFile){
         $scope.sequence = Sequence;
         $scope.auth = Auth;
+        $scope.xiFile = xiFile;
+
+        $scope.goUrl = function(){
+            window.open($scope.sequence.cur_qr, '_system');
+        };
     })
 
     .controller('tempCtrl', function($scope, $state, $stateParams, xiFile, xiHttp, Toast, Sequence, xisoConfig, $ionicPlatform, $ionicNativeTransitions){

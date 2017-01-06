@@ -68,7 +68,7 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
 
     .constant('xisoConfig', {
         // url: '/api/'    // PC 테스트용
-        url: 'http://dip.xiso.co.kr/'    // 실제 기기 테스트용
+        url: 'http://master.softgear.kr/'    // 실제 기기 테스트용
     })
 
     .directive('qrcode', function($interpolate) {
