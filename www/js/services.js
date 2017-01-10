@@ -51,7 +51,7 @@ xisoDip
         return self;
     })
 
-    .factory('Auth', function(xiHttp, dHttp, $interval, $state, Sequence, xiFile, $rootScope) {
+    .factory('Auth', function(xiHttp, dHttp, $interval, $state, Sequence, $rootScope) {
         var self = this;
 
         var timeID = null;
@@ -73,6 +73,8 @@ xisoDip
             
             for(i =0 ; i < a.length ; i++){
                 if(a[i].sid != b[i].sid){
+                    console.log('a['+i+'].sid != b['+i+'].sid');
+                    console.log(a[i].sid +' != '+ b[i].sid);
                     result = false;
                     return false;
                 }
@@ -141,7 +143,7 @@ xisoDip
                         // console.log($rootScope.sequence.main_seq);
 
                         // 시퀀스가 변경되었는지 체크
-                        var device_seq = $rootScope.sequence.main_seq;
+                        var device_seq = angular.copy($rootScope.sequence.main_seq);
                         var server_seq = res.data.seq;
 
                         if(device_seq.timelines && server_seq.timeline) {
@@ -150,10 +152,14 @@ xisoDip
                             // 같은 배열인지 비교후 다르면 다운로드
                             if(!compare_timeline(device_seq.timelines, server_seq.timeline)) {
                                 console.log('다른 타임라인입니다.');
-                                // 파일 다운로드
-                                $rootScope.sequence.setSequence(server_seq, 'm');    // Main(dataServer)
+                                clearInterval(timeID2);
 
-                                xiFile.download($rootScope.sequence.temp_seq.timelines, $rootScope.sequence.temp_seq.dir, self.server_url);
+                                // 파일 다운로드
+                                $rootScope.sequence.setSequence(server_seq, 'm', device_seq.dir);    // Main(dataServer)
+
+                                // xiFile.download($rootScope.sequence.temp_seq.timelines, $rootScope.sequence.temp_seq.dir, self.server_url, device_seq.dir);
+
+                                // self.getSeq(60000); // 60초 간격으로 바꿈
                             }else{
                                 console.log('같은 타임라인입니다.');
                             }
@@ -167,8 +173,9 @@ xisoDip
             }
         };
 
-        self.getSeq = function() {
-            timeID2 = setInterval(checkSeq, 20000);  // 30초에 한번씩 시퀀스가 들어왔나 체크
+        self.getSeq = function(intv) {
+            intv = intv ? intv : 30000;
+            timeID2 = setInterval(checkSeq, 30000);  // 30초에 한번씩 시퀀스가 들어왔나 체크
         };
 
         self.getAuth = function() {
@@ -189,7 +196,7 @@ xisoDip
         return self;
     })
 
-    .factory('xiFile',function($timeout, $ionicPlatform, $cordovaFileTransfer, $timeout, $q, Sequence, $ionicLoading){
+    .factory('xiFile',function($timeout, $ionicPlatform, $cordovaFileTransfer, Sequence, Auth){
         var self = this;
 
         self.is_downloading = false;
@@ -200,7 +207,7 @@ xisoDip
         var fileObj = {};
         var time_len = 0;
 
-        var down = function(timelines, dir, url){
+        var down = function(timelines, dir, url, device_dir){
             time_len--;
             self.cur++;
 
@@ -213,7 +220,7 @@ xisoDip
                 $cordovaFileTransfer.download(path, targetPath, {}, true).then(function(res){
                     console.log(res);
 
-                    down(timelines, dir, url);
+                    down(timelines, dir, url, device_dir);
                 },function(err){
                     console.log(err);
                 }, function (progress) {
@@ -225,11 +232,23 @@ xisoDip
                 self.is_downloading = false;
                 console.log('파일 다운로드 완료');
 
+                self.removeDir(device_dir);
+                
+                Auth.getSeq();  // 다시 interval 돌림
+
                 Sequence.tempToMain();  // 다운로드 완료되면 시퀀스 덮어씀
             }
         };
 
-        self.download = function(timelines, dir, url){
+        self.removeDir = function(dir){
+            if(!dir || typeof(dir)==='undefined') {
+                console.log('이전 dir 이 존재하지 않음');
+            }else{
+                console.log('이전 dir 삭제함 = ' + dir);
+            }
+        };
+
+        self.download = function(timelines, dir, url, device_dir){
 
             document.addEventListener('deviceready', function () {
                 if(timelines.length > 0) {
@@ -241,7 +260,7 @@ xisoDip
                     self.total = timelines.length;
                     self.cur = 0;
 
-                    down(timelines, dir, url);
+                    down(timelines, dir, url, device_dir);
                     // var targetPath = cordova.file.dataDirectory + "galaxy.mp4";
                 }
             }, false);
@@ -294,7 +313,7 @@ xisoDip
         }
     })
 
-    .factory('Sequence', function($state, $ionicNativeTransitions){
+    .factory('Sequence', function($state, $ionicNativeTransitions, xiFile, xisoConfig){
         var self = this;
 
         self.cur_seq = 0;   //현재 재생할 목록
@@ -337,7 +356,7 @@ xisoDip
             }
         };
 
-        self.setSequence = function(seq, prefix){
+        self.setSequence = function(seq, prefix, device_dir){
             self.temp_seq = {};
             self.temp_seq.timelines = [];
             self.temp_seq.text_clip = seq.text_clip;
@@ -353,8 +372,15 @@ xisoDip
                     file_type : seq.timeline[key].file_type,
                     file_srl : seq.timeline[key].file_srl,
                     url : seq.timeline[key].url,
-                    is_show_qr : seq.timeline[key].is_show_qr
+                    is_show_qr : seq.timeline[key].is_show_qr,
+                    sid : seq.timeline[key].sid
                 };
+            }
+
+            if(prefix == 'm') {
+                xiFile.download(self.temp_seq.timelines, self.temp_seq.dir, self.server_url, device_dir);
+            }else {
+                xiFile.download(self.temp_seq.timelines, self.temp_seq.dir, xisoConfig.url);
             }
         };
 

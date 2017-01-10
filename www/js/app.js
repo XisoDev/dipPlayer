@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitions'])
 
-    .run(function($ionicPlatform, $rootScope, $ionicPopup, Auth, Sequence) {
+    .run(function($ionicPlatform, $rootScope, $ionicPopup, xService) {
         $ionicPlatform.ready(function() {
             if(window.cordova && window.cordova.plugins.Keyboard) {
                 // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -24,11 +24,20 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
 
             // console.log(ionic.Platform.device());// returns an object containing device uuid,version, platform, manufacturer ...
             
-            Auth.setDeviceInfo(ionic.Platform.device());
+            xService.setDeviceInfo(ionic.Platform.device());
+
+            if(xService.main_seq.play_type == 'm'){
+                console.log('메인 플레이로 이동');
+                xService.is_auth = true;
+                xService.getAuth();
+            }else{
+                console.log('데모 플레이로 이동');
+                xService.getAuth();
+            }
 
             // console.log(Sequence.main_seq);
 
-            if(Sequence.main_seq.play_type == 'm') {
+            /*if(Sequence.main_seq.play_type == 'm') {
                 console.log('메인 플레이로 이동');
                 Auth.is_auth = true;
 
@@ -36,7 +45,7 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
             }else{
                 console.log('데모 플레이로 이동');
                 Auth.getAuth();
-            }
+            }*/
         });
 
         //back button action
