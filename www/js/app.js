@@ -97,6 +97,42 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
         };
     })
 
+    .directive('videoControl', function ($rootScope) {
+        return function ($scope, $element, attrs) {
+
+            attrs.$observe("controlPlay", function(value) {
+                // console.log('controlPlay: '+value);
+                value = (value == 'false' ? false : true);
+                if (value==false) {
+                    // console.log('  > stop');
+                    $element[0].pause();
+                } else {
+                    // console.log('  > play');
+                    $element[0].play();
+                }
+            });
+
+            $element[0].addEventListener("loadeddata", function () {
+                // console.log('loadeddata');
+                $rootScope.$broadcast('videoEvent.loadeddata', { type: 'loadeddata' });
+            });
+            $element[0].addEventListener("playing", function () {
+                // console.log('playing');
+                $rootScope.$broadcast('videoEvent.playing', { type: 'playing' });
+            });
+            $element[0].addEventListener("ended", function () {
+                // console.log('ended');
+                $rootScope.$broadcast('videoEvent.ended', { type: 'ended' });
+            });
+            $element[0].addEventListener("pause", function () {
+                // console.log($element[0].currentTime);
+                // console.log('pause');
+                $rootScope.$broadcast('videoEvent.pause', { type: 'pause' });
+            });
+            // and so on...
+        }
+    })
+
     .config(function($stateProvider, $urlRouterProvider){
         $stateProvider
             // .state('authentication', {

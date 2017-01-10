@@ -25,25 +25,32 @@ body {
     top: 0;
 }
 .text_down{
+    width:120px;
+    padding-top:15px;
+    border-radius: 10px;
     z-index: 999;
-    width:100px;
-    height:100px;
     position: absolute;
     top: 0;
     right: 0;
-    font-size: 20px;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.5);
     color: #fff;
-    padding: 10px;
     text-align: center;
 }
+.percent{
+    font-size: 30px;
+}
+.total{
+    font-size: 12px;
+}
+
 .text_top {
     z-index: 999;
     width:100%;
-    position: absolute;
+    height:40px;
+    position: fixed;
     top: 0;
     font-size: 20px;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.5);
     color: #fff;
     padding: 10px;
     text-align: center;
@@ -51,12 +58,14 @@ body {
 .text_bot {
     z-index: 999;
     width:100%;
-    position: absolute;
+    height:40px;
+    position: fixed;
     bottom: 0;
     font-size: 20px;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.5);
     color: #fff;
     padding: 10px;
+    white-space:nowrap;
 }
 
 .qrcode {

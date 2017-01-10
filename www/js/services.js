@@ -72,7 +72,7 @@ xisoDip
             if(a.length != b.length) return false;
             
             for(i =0 ; i < a.length ; i++){
-                if(a[i].file_srl != b[i].file_srl){
+                if(a[i].sid != b[i].sid){
                     result = false;
                     return false;
                 }
@@ -189,11 +189,64 @@ xisoDip
         return self;
     })
 
-    .factory('xiFile',function($timeout, $ionicPlatform, $cordovaFileTransfer, $q, Sequence, $ionicLoading){
+    .factory('xiFile',function($timeout, $ionicPlatform, $cordovaFileTransfer, $timeout, $q, Sequence, $ionicLoading){
         var self = this;
 
+        self.is_downloading = false;
+        self.total = 0;
+        self.cur = 0;
+        self.progress = 0;
+
+        var fileObj = {};
+        var time_len = 0;
+
+        var down = function(timelines, dir, url){
+            time_len--;
+            self.cur++;
+
+            if(time_len > -1){
+                var targetPath = fileObj.externalDataDirectory + dir + timelines[time_len].file;
+                console.log(targetPath);
+
+                var path = url + timelines[time_len].uploaded;
+
+                $cordovaFileTransfer.download(path, targetPath, {}, true).then(function(res){
+                    console.log(res);
+
+                    down(timelines, dir, url);
+                },function(err){
+                    console.log(err);
+                }, function (progress) {
+                    $timeout(function () {
+                        self.progress = Math.floor((progress.loaded / progress.total) * 100);
+                    });
+                });
+            }else{
+                self.is_downloading = false;
+                console.log('파일 다운로드 완료');
+
+                Sequence.tempToMain();  // 다운로드 완료되면 시퀀스 덮어씀
+            }
+        };
+
         self.download = function(timelines, dir, url){
-            if(timelines.length > 0) {
+
+            document.addEventListener('deviceready', function () {
+                if(timelines.length > 0) {
+                    self.is_downloading = true;
+                    // console.log(cordova.file);
+                    fileObj = cordova.file;
+
+                    time_len = timelines.length;
+                    self.total = timelines.length;
+                    self.cur = 0;
+
+                    down(timelines, dir, url);
+                    // var targetPath = cordova.file.dataDirectory + "galaxy.mp4";
+                }
+            }, false);
+
+            /*if(timelines.length > 0) {
                 $ionicPlatform.ready(function() {
 
                     // console.log(cordova.file);
@@ -228,7 +281,7 @@ xisoDip
                         $ionicLoading.hide();
                     });
                 });
-            }
+            }*/
 
         };
 
@@ -274,7 +327,7 @@ xisoDip
             self.cur_seq = seq_no;
 
             // transOpt.fixedPixelsTop = 40; // the number of pixels of your fixed header, default 0 (iOS and Android)
-            transOpt.fixedPixelsBottom = 40; // the number of pixels of your fixed footer (f.i. a tab bar), default 0 (iOS and Android)
+            transOpt.fixedPixelsBottom = 39; // the number of pixels of your fixed footer (f.i. a tab bar), default 0 (iOS and Android)
 
             console.log('$state.current.name = '+$state.current.name);
             if ($state.current.name == 'player.demo') {
@@ -322,66 +375,12 @@ xisoDip
             self.cur_seq = 0;
             // $state.go('player.demo', {cur_clip: 0});   // 데모 플레이어로 이동시킴
 
-            $ionicNativeTransitions.stateGo('player.demo2', {cur_clip: self.cur_seq}, {}, {"type":"fade"});
-        };
-        
-        /*self.play = function(idx){
-            var timeline_len = self.main_seq.timelines.length;
-            
-
-            var cur_clip = self.main_seq.timelines[idx];
-
-            var next_clip = {};
-            var next_idx = 0;
-
-            // 마지막 클립이 아니면 다음 클립 가져옴 (전환 효과를 가져오기 위함)
-            if (timeline_len > Number(idx) + 1) {
-                next_idx = Number(idx) + 1;
-            }
-            next_clip = self.main_seq.timelines[next_idx];
-            self.clip_info = {};
-            self.clip_info.file_type = cur_clip.file_type;
-            self.clip_info.content = cordova.file.externalDataDirectory + self.main_seq.dir + cur_clip.file;
-
-            if (cur_clip.is_show_qr == 'Y' && cur_clip.url) {
-                self.cur_qr = cur_clip.url;
+            if ($state.current.name == 'player.demo') {
+                $ionicNativeTransitions.stateGo('player.demo2', {cur_clip: self.cur_seq}, {}, {"type":"fade"});
             } else {
-                self.cur_qr = null;
+                $ionicNativeTransitions.stateGo('player.demo', {cur_clip: self.cur_seq}, {}, {"type":"fade"});
             }
-
-            if (cur_clip.play_type == 'm') {  //메인
-                dHttp.send('file', 'procUpdateCount', {file_srl: cur_clip.file_srl}).then(function (res) {
-                    // console.log(res);
-                }, function (res) {
-                    console.log(res);
-                });
-            } else {  //데모
-                xiHttp.send('file', 'procUpdateCount', {file_srl: cur_clip.file_srl}).then(function (res) {
-                    // console.log(res);
-                }, function (res) {
-                    console.log(res);
-                });
-            }
-
-            console.log('play time = ' + cur_clip.limit + '초');
-
-            self.time_id1 = setTimeout(function(){
-                var arr = next_clip.transition.split('-');
-                var obj = {};
-                var duration = 500; // 효과 전환 시간
-
-                if (arr[0] == 'fade') {
-                    obj.type = 'fade';
-                } else {
-                    obj.type = arr[0];
-                    obj.direction = arr[1];
-                }
-                obj.duration = duration;
-                self.setCurSeq(next_clip, obj);
-
-            }, 1000 * cur_clip.limit + 550);
-            
-        };*/
+        };
 
         return self;
     });

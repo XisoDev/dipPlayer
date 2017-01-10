@@ -3,14 +3,6 @@
  */
 xisoDip
 
-    .controller('authCtrl', function($scope, Auth, $state){
-        $scope.svAuth = Auth;
-
-        $scope.goDemo = function(){
-            $state.go('player.demo');
-        };
-    })
-
     .controller('playerCtrl', function($scope, Sequence, Auth, xiFile){
         $scope.sequence = Sequence;
         $scope.auth = Auth;
@@ -57,8 +49,17 @@ xisoDip
         $scope.xiFile = xiFile;
         $scope.sequence = Sequence;
         $scope.clip_info = {};
+
+        $scope.play_image = false;
+        $scope.play_video = false;
+
+        var next_clip = 0;
+        var transOpt = {};
+
         // $scope.$on('$stateChangeSuccess', function () {
         $scope.$on('$ionicView.enter', function(e) {
+            $scope.play_image = true;
+            $scope.play_video = true;
             // console.log('state changed : ' + $stateParams.cur_clip);
             // if(cordova.file.externalDataDirectory == null) console.log('널이다');
             // else  console.log('널이 아니다');
@@ -78,7 +79,8 @@ xisoDip
                 var cur_clip = main_seq.timelines[index];
 
                 var temp = {};  //다음에 재생할 클립의 정보를 담음
-                var next_clip = 0;
+                // var next_clip = 0;
+                next_clip = 0;
 
                 // 마지막 재생클립이 아니면
                 if (len > (Number(index) + 1)) {
@@ -107,7 +109,7 @@ xisoDip
 
                 if(cur_clip.play_type == 'm'){  //메인
                     dHttp.send('file', 'procUpdateCount', {file_srl : cur_clip.file_srl}).then(function(res){
-                        // console.log(res);
+                        console.log(res);
                     }, function(res){
                         console.log(res);
                     });
@@ -121,25 +123,37 @@ xisoDip
 
                 console.log('play time = ' + cur_clip.limit + '초');
 
-                $scope.sequence.time_id1 = setTimeout(function () {
-                    // console.log('아래는 demo 의 temp');
-                    // console.log(temp);
-                    var arr = temp.transition.split('-');
-                    var obj = {};
-                    var duration = 600; // 효과 전환 시간
+                var arr = temp.transition.split('-');
+                // var transOpt = {};
+                transOpt = {};
+                var duration = 600; // 효과 전환 시간
 
-                    if (arr[0] == 'fade') {
-                        obj.type = 'fade';
-                    } else {
-                        obj.type = arr[0];
-                        obj.direction = arr[1];
-                    }
-                    obj.duration = duration;
+                if (arr[0] == 'fade') {
+                    transOpt.type = 'fade';
+                } else {
+                    transOpt.type = arr[0];
+                    transOpt.direction = arr[1];
+                }
+                transOpt.duration = duration;
 
+                // 이미지일땐 setTimeout 사용
+                if(cur_clip.file_type.indexOf('image') == 0) {
+                    $scope.sequence.time_id1 = setTimeout(function () {
+
+
+                        clearTimeout($scope.sequence.time_id1);
+                        $scope.sequence.setCurSeq(next_clip, transOpt);
+
+                    }, 1000 * cur_clip.limit + 700);
+
+                }
+
+                // 비디오일땐 ended 이벤트 사용
+                $scope.$on('videoEvent.ended', function(){
+                    console.log('비디오 재생이 끝났습니다');
                     clearTimeout($scope.sequence.time_id1);
-                    $scope.sequence.setCurSeq(next_clip, obj);
-
-                }, 1000 * cur_clip.limit + 700);
+                    $scope.sequence.setCurSeq(next_clip, transOpt);
+                });
 
 
             }else{
@@ -151,6 +165,29 @@ xisoDip
                 },500);
             }
         });
+
+        // 이미지를 탭했을때
+        $scope.tab_image = function(){
+            clearTimeout($scope.sequence.time_id1);
+            clearTimeout($scope.sequence.time_id2);
+            if($scope.play_image) {
+                $scope.play_image = false;
+                console.log('이미지를 멈춤');
+            }else{
+                $scope.play_image = true;
+                console.log('이미지를 재동작');
+                $scope.sequence.time_id1 = setTimeout(function () {
+                    $scope.sequence.setCurSeq(next_clip, transOpt);
+                }, 1000);   // 멈춘후 재시작하면 1초
+            }
+        };
+
+        // 비디오를 탭했을때
+        $scope.tab_video = function(){
+            clearTimeout($scope.sequence.time_id1);
+            clearTimeout($scope.sequence.time_id2);
+            $scope.play_video = !$scope.play_video;
+        };
 
     });
 

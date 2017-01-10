@@ -1,10 +1,10 @@
 <ion-view cache-view="false">
     <ion-content style="background-color: #000;" scroll="false">
-        <div ng-if="clip_info.file_type.indexOf('image') == 0" style="text-align: center;">
+        <div ng-if="clip_info.file_type.indexOf('image') == 0" style="text-align: center;" ng-click="tab_image()">
             <img ng-src="{{clip_info.content}}" class="fullscreen-image" />
         </div>
-        <div ng-if="clip_info.file_type.indexOf('video') == 0" style="text-align: center;">
-            <video controls autoplay width="100%" class="fullscreen-image">
+        <div ng-if="clip_info.file_type.indexOf('video') == 0" style="text-align: center;" ng-click="tab_video()">
+            <video video-control controls autoplay control-play="{{play_video}}" width="100%" class="fullscreen-image">
                 <source ng-src="{{clip_info.content}}" type="{{clip_info.file_type}}">
                 비디오플레이가 지원되지 않습니다. 브라우저를 업데이트하세요.
             </video>
