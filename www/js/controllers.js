@@ -87,7 +87,7 @@ xisoDip
                 // 현재 플레이 되는 클립의 정보
                 $scope.clip_info = {
                     file_type: cur_clip.file_type,
-                    content: $scope.xService.fileObj.externalDataDirectory + main_seq.dir + cur_clip.file
+                    content: $scope.xService.fileObj.dataDirectory + main_seq.dir + cur_clip.file
                 };
 
                 // console.log(cur_clip);
@@ -98,9 +98,9 @@ xisoDip
                     $scope.xService.cur_qr = null;
                 }
 
-                if(cur_clip.play_type == 'm'){  //메인
+                if(main_seq.play_type == 'm'){  //메인
                     dHttp.send('file', 'procUpdateCount', {file_srl : cur_clip.file_srl}).then(function(res){
-                        console.log(res);
+                        // console.log(res);
                     }, function(res){
                         console.log(res);
                     });

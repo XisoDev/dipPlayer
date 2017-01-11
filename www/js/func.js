@@ -13,12 +13,32 @@ function onum(str){
 var compare_timeline = function(a, b){
     var result = true;
 
-    if(a.length != b.length) return false;
+    console.log(a);
+    console.log(b);
 
-    for(i =0 ; i < a.length ; i++){
-        if(a[i].sid != b[i].sid){
-            console.log('a['+i+'].sid != b['+i+'].sid');
-            console.log(a[i].sid +' != '+ b[i].sid);
+    // 공지사항이 다르면
+    if(a.text_clip != b.text_clip) return false;
+
+    // 타임라인 길이가 다르면
+    if(a.timelines.length != b.timeline.length) return false;
+
+    for(i =0 ; i < a.timelines.length ; i++){
+        if(a.timelines[i].sid != b.timeline[i].sid){
+            result = false;
+            return false;
+        }
+
+        if(a.timelines[i].limit != b.timeline[i].duration){
+            result = false;
+            return false;
+        }
+
+        if(a.timelines[i].is_show_qr != b.timeline[i].is_show_qr){
+            result = false;
+            return false;
+        }
+
+        if(a.timelines[i].url != b.timeline[i].url){
             result = false;
             return false;
         }

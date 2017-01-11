@@ -1,5 +1,5 @@
 xisoDip
-.factory('xService', function(xiHttp, dHttp, xisoConfig, $ionicNativeTransitions, $cordovaFileTransfer, $timeout, $state){
+.factory('xService', function(xiHttp, dHttp, xisoConfig, $ionicNativeTransitions, $cordovaFile, $cordovaFileTransfer, $timeout, $state){
     var self = this;
     
     // ------------------------------------------------------------------------------------------------
@@ -90,7 +90,9 @@ xisoDip
 
                         self.is_auth = true;
 
-                        // self.getSeq();
+                        clearInterval(timeID2);
+                        timeID2 = undefined;
+                        self.getSeq();
                     }
                 }
             }, function (err) {
@@ -118,7 +120,8 @@ xisoDip
                         console.log('device_seq and sever_seq is available');
 
                         // 같은 배열인지 비교후 다르면 다운로드
-                        if(!compare_timeline(device_seq.timelines, server_seq.timeline)) {
+                        // if(!compare_timeline(device_seq.timelines, server_seq.timeline)) {
+                        if(!compare_timeline(device_seq, server_seq)) {
                             console.log('다른 타임라인입니다.');
                             clearInterval(timeID2);
                             timeID2 = undefined;
@@ -159,8 +162,8 @@ xisoDip
         self.down_cur++;
 
         if(down_time_len > -1){
-            var targetPath = self.fileObj.externalDataDirectory + dir + timelines[down_time_len].file;
-            console.log(targetPath);
+            var targetPath = self.fileObj.dataDirectory + dir + timelines[down_time_len].file;
+            // console.log(targetPath);
 
             var path = url + timelines[down_time_len].uploaded;
 
@@ -193,7 +196,7 @@ xisoDip
             if(timelines.length > 0) {
                 self.is_downloading = true;
                 
-                self.fileObj = cordova.file;
+                // self.fileObj = cordova.file;
 
                 down_time_len = timelines.length;
                 self.down_total = timelines.length;
@@ -210,6 +213,11 @@ xisoDip
             console.log('이전 dir 이 존재하지 않음');
         }else{
             console.log('이전 dir 삭제함 = ' + dir);
+            $cordovaFile.removeRecursively(self.fileObj.dataDirectory, dir).then(function(success){
+                console.log(success);
+            },function(error){
+                console.log(error);
+            });
         }
     };
 

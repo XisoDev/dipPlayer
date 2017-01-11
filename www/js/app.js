@@ -23,7 +23,11 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
             }
 
             // console.log(ionic.Platform.device());// returns an object containing device uuid,version, platform, manufacturer ...
-            
+
+            xService.fileObj = cordova.file;
+            console.log('fileObj---');
+            console.log(xService.fileObj);
+
             xService.setDeviceInfo(ionic.Platform.device());
 
             if(xService.main_seq.play_type == 'm'){
