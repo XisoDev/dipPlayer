@@ -104,7 +104,7 @@ xisoDip
     // 다른 시퀀스가 들어왔는지 체크하여 다른 시퀀스면 다운로드 시킴.
     var checkSeq = function() {
 
-        if(self.is_auth) {
+        if(self.is_auth && !self.is_downloading) {
             var deviceInfo = JSON.parse(window.localStorage['device']);
 
             // 시퀀스 저장
@@ -162,7 +162,7 @@ xisoDip
         self.down_cur++;
 
         if(down_time_len > -1){
-            var targetPath = self.fileObj.dataDirectory + dir + timelines[down_time_len].file;
+            var targetPath = self.fileObj.externalDataDirectory + dir + timelines[down_time_len].file;
             // console.log(targetPath);
 
             var path = url + timelines[down_time_len].uploaded;
@@ -212,12 +212,16 @@ xisoDip
         if(!dir || typeof(dir)==='undefined') {
             console.log('이전 dir 이 존재하지 않음');
         }else{
-            console.log('이전 dir 삭제함 = ' + dir);
-            $cordovaFile.removeRecursively(self.fileObj.dataDirectory, dir).then(function(success){
-                console.log(success);
-            },function(error){
-                console.log(error);
-            });
+            if(self.temp_seq.dir != dir) {
+                console.log('이전 dir 삭제함 = ' + dir);
+                $cordovaFile.removeRecursively(self.fileObj.externalDataDirectory, dir).then(function (success) {
+                    console.log(success);
+                }, function (error) {
+                    console.log(error);
+                });
+            }else{
+                console.log('같은 시퀀스 dir 이라 삭제하지 않음');
+            }
         }
     };
 

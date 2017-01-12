@@ -87,7 +87,7 @@ xisoDip
                 // 현재 플레이 되는 클립의 정보
                 $scope.clip_info = {
                     file_type: cur_clip.file_type,
-                    content: $scope.xService.fileObj.dataDirectory + main_seq.dir + cur_clip.file
+                    content: $scope.xService.fileObj.externalDataDirectory + main_seq.dir + cur_clip.file
                 };
 
                 // console.log(cur_clip);
