@@ -234,7 +234,9 @@ xisoDip
         self.cur_seq = seq_no;
 
         // transOpt.fixedPixelsTop = 40; // the number of pixels of your fixed header, default 0 (iOS and Android)
-        transOpt.fixedPixelsBottom = 39; // the number of pixels of your fixed footer (f.i. a tab bar), default 0 (iOS and Android)
+        if(self.main_seq.text_clip) {
+            transOpt.fixedPixelsBottom = 39; // the number of pixels of your fixed footer (f.i. a tab bar), default 0 (iOS and Android)
+        }
 
         console.log('$state.current.name = '+$state.current.name);
         if ($state.current.name == 'player.demo') {

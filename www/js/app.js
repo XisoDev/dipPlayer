@@ -117,33 +117,47 @@ var xisoDip = angular.module('dip', ['ionic','ngCordova','ionic-native-transitio
                 // console.log('controlPlay: '+value);
                 value = (value == 'false' ? false : true);
                 if (value==false) {
-                    // console.log('  > stop');
+                    console.log('  > stop');
                     $element[0].pause();
                 } else {
-                    // console.log('  > play');
+                    console.log('  > play');
                     $element[0].play();
                 }
             });
 
             $element[0].addEventListener("loadeddata", function () {
-                // console.log('loadeddata');
+                console.log('loadeddata');
                 $rootScope.$broadcast('videoEvent.loadeddata', { type: 'loadeddata' });
             });
             $element[0].addEventListener("playing", function () {
-                // console.log('playing');
+                console.log('playing');
                 $rootScope.$broadcast('videoEvent.playing', { type: 'playing' });
             });
             $element[0].addEventListener("ended", function () {
-                // console.log('ended');
+                console.log('ended');
                 $rootScope.$broadcast('videoEvent.ended', { type: 'ended' });
             });
             $element[0].addEventListener("pause", function () {
                 // console.log($element[0].currentTime);
-                // console.log('pause');
+                console.log('pause');
                 $rootScope.$broadcast('videoEvent.pause', { type: 'pause' });
             });
             // and so on...
         }
+    })
+
+    .config(function($ionicNativeTransitionsProvider){
+        $ionicNativeTransitionsProvider.setDefaultOptions({
+            duration: 1000 // in milliseconds (ms), default 400,
+            // slowdownfactor: 30, // overlap views (higher number is more) or no overlap (1), default 4
+            // iosdelay: -1, // ms to wait for the iOS webview to update before animation kicks in, default -1
+            // androiddelay: -1, // same as above but for Android, default -1
+            // winphonedelay: -1, // same as above but for Windows Phone, default -1,
+            // fixedPixelsTop: 0, // the number of pixels of your fixed header, default 0 (iOS and Android)
+            // fixedPixelsBottom: 0, // the number of pixels of your fixed footer (f.i. a tab bar), default 0 (iOS and Android)
+            // triggerTransitionEvent: '$ionicView.afterEnter', // internal ionic-native-transitions option
+            // backInOppositeDirection: false // Takes over default back transition and state back transition to use the opposite direction transition to go back
+        });
     })
 
     .config(function($stateProvider, $urlRouterProvider){

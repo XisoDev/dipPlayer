@@ -117,7 +117,7 @@ xisoDip
                 var arr = temp.transition.split('-');
                 // var transOpt = {};
                 transOpt = {};
-                var duration = 600; // 효과 전환 시간
+                var duration = 1000; // 효과 전환 시간
 
                 if (arr[0] == 'fade') {
                     transOpt.type = 'fade';
@@ -127,23 +127,31 @@ xisoDip
                 }
                 transOpt.duration = duration;
 
-                // 이미지일땐 setTimeout 사용
-                if(cur_clip.file_type.indexOf('image') == 0) {
-                    $scope.xService.time_id1 = setTimeout(function () {
+                if($scope.xService.main_seq.timelines.length > 1) {
+                    // 이미지일땐 setTimeout 사용
+                    if (cur_clip.file_type.indexOf('image') == 0) {
+                        $scope.xService.time_id1 = setTimeout(function () {
 
 
-                        clearTimeout($scope.xService.time_id1);
-                        $scope.xService.setCurSeq(next_clip, transOpt);
+                            clearTimeout($scope.xService.time_id1);
+                            $scope.xService.setCurSeq(next_clip, transOpt);
 
-                    }, 1000 * Number(cur_clip.limit) + 700);
+                        }, 1000 * Number(cur_clip.limit) + 1100);
 
+                    }
                 }
 
                 // 비디오일땐 ended 이벤트 사용
                 $scope.$on('videoEvent.ended', function(){
+                    $scope.play_video = false;
+                    $scope.$apply();
                     console.log('비디오 재생이 끝났습니다');
                     clearTimeout($scope.xService.time_id1);
-                    $scope.xService.setCurSeq(next_clip, transOpt);
+                    if($scope.xService.main_seq.timelines.length > 1) {
+                        $scope.xService.setCurSeq(next_clip, transOpt);
+                    }else{
+                        $scope.tab_video(true);
+                    }
                 });
 
 
@@ -174,10 +182,16 @@ xisoDip
         };
 
         // 비디오를 탭했을때
-        $scope.tab_video = function(){
+        $scope.tab_video = function(play){
             clearTimeout($scope.xService.time_id1);
             clearTimeout($scope.xService.time_id2);
-            $scope.play_video = !$scope.play_video;
+            if(!play) {
+                $scope.play_video = !$scope.play_video;
+                $scope.$apply();
+            }else{
+                $scope.play_video = true;
+                $scope.$apply();
+            }
         };
 
     });
