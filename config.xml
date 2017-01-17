@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<widget id="com.ionicframework.dipplayer494891" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>소프트기어 DID플레이어</name>
-  <description>
-        An Ionic Framework and Cordova project.
-    </description>
-  <author email="overcode@xiso.co.kr" href="http://xiso.co.kr/">
-      OVERCODE
-    </author>
+<widget id="kr.softgear.did_player" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+  <name>TV Cast Player</name>
+  <description>소프트기어 DID 플레이어</description>
+  <author email="bckim@jdfnc.com" href="http://softgear.co.kr/">SOFTGEAR</author>
   <content src="index.html"/>
   <access origin="*"/>
   <preference name="webviewbounce" value="false"/>
@@ -52,6 +48,7 @@
     <splash src="resources/ios/splash/Default~iphone.png" width="320" height="480"/>
   </platform>
   <platform name="android">
+    <preference name="android-manifest/@android:hardwareAccelerated" value="false"/>
     <icon src="resources/android/icon/drawable-ldpi-icon.png" density="ldpi"/>
     <icon src="resources/android/icon/drawable-mdpi-icon.png" density="mdpi"/>
     <icon src="resources/android/icon/drawable-hdpi-icon.png" density="hdpi"/>
